@@ -7,7 +7,7 @@ class Article(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=30)
     content = models.TextField()
-    # null=True 추후 삭제예정
+    # after_image null=True 추후 삭제예정
     after_image = models.ImageField(blank=True, null=True, upload_to="transfer_images/")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
