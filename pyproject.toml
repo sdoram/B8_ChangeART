@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "b8-change-art"
+version = "0.0.0"
+description = "b8_project"
+authors = ["Seman_Kim <sdoramkim@gmail.com>"]
+readme = "README.md"
+packages = [{include = "b8_change_art"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+djangorestframework-simplejwt = "^5.2.2"
+django-cors-headers = "^4.0.0"
+pillow = "^9.5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
