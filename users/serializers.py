@@ -15,7 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-    # patch 고려해봅시다 :)
     def update(self, instance, validated_data):
         user = super().update(validated_data)
         password = user.password
