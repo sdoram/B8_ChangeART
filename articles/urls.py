@@ -1,1 +1,12 @@
+from django.urls import path
+from articles import views
 
+urlpatterns = [
+    path("newpost/", views.ArticleView.as_view(), name="article_create_view"),
+    path("<int:article_id>/", views.ArticleView.as_view(), name="article_detail_view"),
+    path(
+        "<int:article_id>/like/",
+        views.ArticleLikeView.as_view(),
+        name="article_like_view",
+    ),
+]
