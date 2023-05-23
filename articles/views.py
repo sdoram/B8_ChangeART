@@ -1,7 +1,7 @@
 from .models import Comment
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from serializers import CommentSerializer
+from .serializers import CommentSerializer
 from rest_framework.generics import get_object_or_404
 
 
@@ -21,7 +21,7 @@ class ArticleView(APIView):
     def delete(self, request, article_id):
         """게시글 삭제"""
         pass
-      
+
 
 class CommentView(APIView):
     def post(self, request, article_id):
