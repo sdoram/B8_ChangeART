@@ -84,7 +84,7 @@ class ArticleLikeView(APIView):
             return Response({"message": "좋아요를 했습니다."}, status=status.HTTP_200_OK)
 
         pass
-      
+
 
 class CommentView(APIView):
     def post(self, request, article_id):
