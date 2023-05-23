@@ -5,6 +5,24 @@ from serializers import CommentSerializer
 from rest_framework.generics import get_object_or_404
 
 
+class ArticleView(APIView):
+    def get(self, request, article_id):
+        """상세 게시글 보기"""
+        pass
+
+    def post(self, request):
+        """게시글 작성"""
+        pass
+
+    def put(self, request, article_id):
+        """게시글 수정"""
+        pass
+
+    def delete(self, request, article_id):
+        """게시글 삭제"""
+        pass
+      
+
 class CommentView(APIView):
     def post(self, request, article_id):
         """댓글을 작성합니다."""
