@@ -27,3 +27,6 @@ class Comment(models.Model):
     content = models.CharField("내용", max_length=300)
     created_at = models.DateTimeField("작성날짜", auto_now_add=True)
     updated_at = models.DateTimeField("수정날짜", auto_now=True)
+
+    def __str__(self):
+        return self.content
