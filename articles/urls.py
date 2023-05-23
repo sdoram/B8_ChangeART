@@ -9,4 +9,6 @@ urlpatterns = [
         views.ArticleLikeView.as_view(),
         name="article_like_view",
     ),
+    path("<int:article_id>/comment", views.CommentView.as_view()),
+    path("comment/<int:comment_id>", views.CommentView.as_view()),
 ]
