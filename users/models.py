@@ -27,7 +27,9 @@ class User(AbstractBaseUser):
         unique=True,
     )
     nickname = models.CharField(max_length=50, verbose_name="닉네임")
-    profile_image = models.ImageField(null=True, blank=True, verbose_name="프로필사진")
+    profile_image = models.ImageField(
+        null=True, blank=True, verbose_name="프로필사진", upload_to="image/profile/%m/%d/"
+    )
     following = models.ManyToManyField(
         "self",
         blank=True,
@@ -36,7 +38,7 @@ class User(AbstractBaseUser):
         verbose_name="팔로잉 리스트",
     )
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
     objects = UserManager()
@@ -62,3 +64,8 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+
+class Verify(models.Model):
+    email = models.EmailField()
+    athnt_code = models.CharField(max_length=6)
