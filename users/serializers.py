@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User
+from rest_framework.generics import get_object_or_404
+from .models import User, Verify
 from articles.models import Article
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -25,6 +26,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+# 인증번호 대조
+class VerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    verify_code = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        email = data.get("email")
+        verify_code = data.get("verify_code")
+        access = get_object_or_404(Verify, email=email)
+        if verify_code == access.athnt_code:
+            return data
+
+
+# 마이페이지의 게시글
 class UserArticlesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
@@ -34,7 +49,6 @@ class UserArticlesSerializer(serializers.ModelSerializer):
 # 마이페이지용
 class UserPageSerializer(serializers.ModelSerializer):
     user_articles = UserArticlesSerializer(many=True, read_only=True)
-
 
     class Meta:
         model = User
