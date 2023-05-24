@@ -8,4 +8,5 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path("signup/", views.SignupView.as_view(), name="signup_view"),
     path("login/", views.LoginView.as_view(), name="login_view"),
+    path("<int:user_id>/", views.FollowView.as_view(), name="follow_view")
 ]
