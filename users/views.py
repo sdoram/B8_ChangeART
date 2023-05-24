@@ -1,19 +1,19 @@
+from random import randint
+from django.core.mail import EmailMessage
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .serializers import UserSerializer, UserTokenObtainPairSerializer
-
 from .models import User, Verify
 from users.serializers import (
     UserSerializer,
     UserTokenObtainPairSerializer,
     UserPageSerializer,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView
-from django.core.mail import EmailMessage
-from random import randint
 
 
 # 인증코드 생성 & 이메일 발송
@@ -49,6 +49,7 @@ class EmailAccessView(APIView):
             )
 
 
+
 # 회원가입
 class SignupView(APIView):
     def post(self, request):
@@ -63,11 +64,13 @@ class LoginView(TokenObtainPairView):
     serializer_class = UserTokenObtainPairSerializer
 
 
+
 # 마이페이지
 class MyPageView(APIView):
     # 내 정보 보기
     def get(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
+
         serializer = UserPageSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -93,3 +96,17 @@ class MyPageView(APIView):
             return Response({"message": "탈퇴하셨습니다."}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "권한이 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
+         
+class FollowView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, user_id):
+        following_user = get_object_or_404(User, id=user_id)          # 내가 팔로우 하려는 유저
+        user = request.user                                   # 나
+        if user in following_user.following.all():
+            following_user.following.remove(user)
+            return Response({"message": "팔로우 취소"}, status=status.HTTP_200_OK)
+        else:
+            following_user.following.add(user)
+            return Response({"message": "팔로우"}, status=status.HTTP_200_OK)

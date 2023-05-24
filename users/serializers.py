@@ -4,6 +4,7 @@ from articles.models import Article
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
+# 회원가입, 정보수정
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        user = super().update(validated_data)
+        user = super().update(instance, validated_data)
         password = user.password
         user.set_password(password)
         user.save()
@@ -33,6 +34,7 @@ class UserArticlesSerializer(serializers.ModelSerializer):
 # 마이페이지용
 class UserPageSerializer(serializers.ModelSerializer):
     user_articles = UserArticlesSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = User
