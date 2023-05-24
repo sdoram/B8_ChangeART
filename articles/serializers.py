@@ -23,18 +23,16 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = "__all__"
+        exclude = ["like"]
 
     def create(self, validated_data):
         images_data = self.context.get("request").FILES
-        validated_data.pop("like")
         article = Article.objects.create(**validated_data)
         for image_data in images_data.getlist("image"):
             Images.objects.create(article=article, image=image_data)
         return article
 
     def update(self, article, validated_data):
-        validated_data.pop("like")
         article.title = validated_data.get("title", article.title)
         article.content = validated_data.get("content", article.content)
 
