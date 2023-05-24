@@ -10,7 +10,7 @@ Django==4.2.1
 django-cors-headers==4.0.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
-dlib==19.24.1
+# dlib==19.24.1
 flatbuffers==1.12
 gast==0.4.0
 google-auth==2.18.1
@@ -44,9 +44,9 @@ sqlparse==0.4.4
 tensorboard==2.9.1
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
-tensorflow==2.13.0rc0
+tensorflow==2.9
 tensorflow-estimator==2.9.0
-tensorflow-macos==2.9.0
+# tensorflow-macos==2.9.0
 termcolor==2.3.0
 typing-extensions==4.6.0
 urllib3==1.26.16
