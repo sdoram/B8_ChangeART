@@ -20,6 +20,7 @@ from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
+    HomeSerializer,
 )
 import ast
 
@@ -42,7 +43,7 @@ class HomeView(APIView):
         else:
             articles = Article.objects.all().order_by("-created_at")
 
-        serializer = ArticleDetailSerializer(articles, many=True)
+        serializer = HomeSerializer(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -73,7 +74,6 @@ class ArticleView(APIView):
         article = get_object_or_404(Article, id=article_id)
         delete_images = request.data.get("delete_images", [])
         delete_images = ast.literal_eval(delete_images)
-        # 이미지 인덱스(id)가 게시글에 종속되었는지 체크해줘야 함!
 
         if request.user == article.user:
             serializer = ArticleCreateSerializer(
