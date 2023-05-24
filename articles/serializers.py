@@ -39,15 +39,10 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         article.content = validated_data.get("content", article.content)
 
         images_data = self.context.get("request").FILES
-        existing_images = article.images_set.all()
 
-        # 기존 이미지 삭제
-        # for image in existing_images:
-        #     image.delete()
-
-        # 지금은 수정 시 이미지 추가만 됨.. 프론트에서 해결?
         for image_data in images_data.getlist("image"):
             Images.objects.create(article=article, image=image_data)
+
         article.save()
         return article
 

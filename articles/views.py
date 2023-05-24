@@ -9,6 +9,7 @@ from .serializers import (
     ArticleDetailSerializer,
     CommentSerializer,
 )
+import ast
 
 
 class ArticleView(APIView):
@@ -36,6 +37,9 @@ class ArticleView(APIView):
     def put(self, request, article_id):
         """게시글 수정"""
         article = get_object_or_404(Article, id=article_id)
+        delete_images = request.data.get("delete_images", [])
+        delete_images = ast.literal_eval(delete_images)
+        # 이미지 인덱스(id)가 게시글에 종속되었는지 체크해줘야 함!
 
         if request.user == article.user:
             serializer = ArticleCreateSerializer(
@@ -43,6 +47,13 @@ class ArticleView(APIView):
             )
             if serializer.is_valid():
                 serializer.save(user=request.user)
+
+                # 이미지 선택해서 삭제
+                if delete_images:
+                    Images.objects.filter(
+                        id__in=delete_images, article=article
+                    ).delete()
+
                 return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
