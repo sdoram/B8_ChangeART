@@ -15,6 +15,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Article, Comment, Images
+from django.db.models import Count, F
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
@@ -22,6 +23,27 @@ from .serializers import (
 )
 import ast
 
+
+class HomeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        """홈 화면에서 게시글 목록을 반환"""
+        order_by = request.query_params.get("order_by")
+
+        if order_by == "likes":
+            articles = Article.objects.all().order_by("-likes", "-created_at")
+        elif order_by == "latest":
+            articles = Article.objects.all().order_by("-created_at")
+        elif order_by == "comments":
+            articles = Article.objects.annotate(
+                comment_count=Count("comments")
+            ).order_by("-comment_count", "-created_at")
+        else:
+            articles = Article.objects.all().order_by("-created_at")
+
+        serializer = ArticleDetailSerializer(articles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ArticleView(APIView):
