@@ -176,4 +176,12 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = True  # 개발중 사용 모든 cors 허용
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
+EMAIL_PORT = "587"  # gmail과 통신하는 포트
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")  # 발신할 이메일
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")  # 발신할 메일의 비밀번호
+EMAIL_USE_TLS = True  # TLS 보안 방법
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
 AUTH_USER_MODEL = "users.User"
+
