@@ -48,9 +48,16 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """댓글 시리얼라이저"""
+
+    nickname = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = "__all__"
+        fields = ("content", "nickname", "created_at", "updated_at")
+
+    def get_nickname(self, obj):
+        return obj.user.nickname
 
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
