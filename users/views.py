@@ -1,15 +1,17 @@
-from django.shortcuts import render
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, permissions
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from .models import User
 from users.serializers import (
     UserSerializer,
     UserTokenObtainPairSerializer,
     UserPageSerializer,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 
 # 회원가입
@@ -28,6 +30,21 @@ class SignupView(APIView):
 # 로그인
 class LoginView(TokenObtainPairView):
     serializer_class = UserTokenObtainPairSerializer
+
+
+class FollowView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, user_id):
+        following_user = get_object_or_404(User, id=user_id)          # 내가 팔로우 하려는 유저
+        user = request.user                                   # 나
+        if user in following_user.following.all():
+            following_user.following.remove(user)
+            return Response({"message": "팔로우 취소"}, status=status.HTTP_200_OK)
+        else:
+            following_user.following.add(user)
+            return Response({"message": "팔로우"}, status=status.HTTP_200_OK)
 
 
 # 마이페이지
@@ -62,20 +79,3 @@ class MyPageView(APIView):
             return Response({"message": "탈퇴하셨습니다."}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "권한이 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# 팔로우
-# class FollowView(APIView):
-#     def post(self, request, user_id):
-#         user = get_object_or_404(User, id=user_id)
-#         follow_list = user.following_list.all()
-#         if request.user in follow_list:
-#             follow_list.delete(request.user)
-#             return Response({"message": "팔로우를 취소했습니다!"}, status=status.HTTP_200_OK)
-#         elif request.user not in follow_list:
-#             follow_list.save(request.user)
-#             return Response({"message": "팔로우를 눌렀습니다!"}, status=status.HTTP_200_OK)
-#         elif request.user == user_id:
-#             return Response(
-#                 {"message": "자신은 팔로우 할 수 없습니다!"}, status=status.HTTP_400_BAD_REQUEST
-#             )
