@@ -33,7 +33,8 @@ class UserArticlesSerializer(serializers.ModelSerializer):
 
 # 마이페이지용
 class UserPageSerializer(serializers.ModelSerializer):
-    user_articles = UserArticlesSerializer(many=True)
+    user_articles = UserArticlesSerializer(many=True, read_only=True)
+
 
     class Meta:
         model = User
