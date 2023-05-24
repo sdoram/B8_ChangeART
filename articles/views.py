@@ -14,18 +14,19 @@ from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Article, Comment
+from .models import Article, Comment, Images
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
 )
+import ast
+
 
 
 class ArticleView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     authentication_classes = [JWTAuthentication]
-    # 얘네 쓰면 편하지만 그럼 상세게시글 보기에도 적용이 됨 고민중 -> OrReadOnly로 시도
 
     def get(self, request, article_id):
         """상세 게시글 보기"""
@@ -35,12 +36,10 @@ class ArticleView(APIView):
 
     def post(self, request):
         """게시글 작성"""
-        serializer = ArticleCreateSerializer(data=request.data)
+        serializer = ArticleCreateSerializer(
+            data=request.data, context={"request": request}
+        )
 
-        # if not request.user.is_authenticated:
-        #     return Response(
-        #         {"message": "로그인이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED
-        #     )
         if serializer.is_valid():
             serializer.save(user=request.user)
             return Response({"message": "게시글을 등록했습니다."}, status=status.HTTP_200_OK)
@@ -50,16 +49,23 @@ class ArticleView(APIView):
     def put(self, request, article_id):
         """게시글 수정"""
         article = get_object_or_404(Article, id=article_id)
-
-        # if not request.user.is_authenticated:
-        #     return Response(
-        #         {"message": "로그인이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED
-        #     )
+        delete_images = request.data.get("delete_images", [])
+        delete_images = ast.literal_eval(delete_images)
+        # 이미지 인덱스(id)가 게시글에 종속되었는지 체크해줘야 함!
 
         if request.user == article.user:
-            serializer = ArticleCreateSerializer(article, data=request.data)
+            serializer = ArticleCreateSerializer(
+                article, data=request.data, context={"request": request}
+            )
             if serializer.is_valid():
                 serializer.save(user=request.user)
+
+                # 이미지 선택해서 삭제
+                if delete_images:
+                    Images.objects.filter(
+                        id__in=delete_images, article=article
+                    ).delete()
+
                 return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -69,11 +75,6 @@ class ArticleView(APIView):
     def delete(self, request, article_id):
         """게시글 삭제"""
         article = get_object_or_404(Article, id=article_id)
-
-        # if not request.user.is_authenticated:
-        #     return Response(
-        #         {"message": "로그인이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED
-        #     )
 
         if request.user == article.user:
             article.delete()
@@ -97,8 +98,6 @@ class ArticleLikeView(APIView):
         else:
             article.like.add(request.user)
             return Response({"message": "좋아요를 했습니다."}, status=status.HTTP_200_OK)
-
-        pass
 
 
 class CommentView(APIView):
