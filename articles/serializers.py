@@ -23,18 +23,16 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = "__all__"
+        exclude = ["like"]
 
     def create(self, validated_data):
         images_data = self.context.get("request").FILES
-        validated_data.pop("like")
         article = Article.objects.create(**validated_data)
         for image_data in images_data.getlist("image"):
             Images.objects.create(article=article, image=image_data)
         return article
 
     def update(self, article, validated_data):
-        validated_data.pop("like")
         article.title = validated_data.get("title", article.title)
         article.content = validated_data.get("content", article.content)
 
@@ -64,6 +62,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     """게시글 상세보기 시리얼라이저(좋아요, 댓글까지)"""
 
     user = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     comments = CommentSerializer(source="comment_set", many=True)
     images = ImageSerializer(source="images_set", many=True, read_only=True)
@@ -72,7 +71,7 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         return obj.user.nickname
 
     def get_user_id(self, obj):
-        return obj.user.user_id
+        return obj.user.id
 
     def get_like_count(self, obj):
         return obj.like.count()
@@ -81,8 +80,43 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
         model = Article
         fields = "__all__"
 
+
 class ChangeSerializer(serializers.ModelSerializer):
     """이미지 변환 시리얼라이저"""
     class Meta:
         model = Change
         fields = ('before_image', 'after_image',)
+
+
+class HomeSerializer(serializers.ModelSerializer):
+    """메인페이지 시리얼라이저"""
+
+    user = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    comments = CommentSerializer(source="comment_set", many=True)
+    image = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        return obj.user.nickname
+
+    def get_user_id(self, obj):
+        return obj.user.id
+
+    def get_like_count(self, obj):
+        return obj.like.count()
+
+    def get_image(self, obj):
+        if obj.images_set.exists():
+            first_image = obj.images_set.first()
+            return {
+                "id": first_image.id,
+                "image": first_image.image.url,
+                "article": obj.id,
+            }
+        else:
+            return None
+
+    class Meta:
+        model = Article
+        exclude = ["like"]

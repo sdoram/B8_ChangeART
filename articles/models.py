@@ -4,7 +4,9 @@ from users.models import User
 
 # 게시글 모델
 class Article(models.Model):
-    user = models.ForeignKey(User, verbose_name="작성자", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, verbose_name="작성자", on_delete=models.CASCADE, related_name="user_articles"
+    )
     title = models.CharField("제목", max_length=30)
     content = models.TextField("내용", null=True)
     created_at = models.DateTimeField("작성시간", auto_now_add=True)

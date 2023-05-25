@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
+    path("athnt/", views.AthntCodeCreateView.as_view(), name="athnt_code_create_view"),
     path("signup/", views.SignupView.as_view(), name="signup_view"),
     path("login/", views.LoginView.as_view(), name="login_view"),
     path("<int:user_id>/", views.FollowView.as_view(), name="follow_view"),

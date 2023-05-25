@@ -9,6 +9,7 @@ Todo:
     * 다중 이미지 처리 view 만들기
 
 """
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
@@ -17,13 +18,43 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .change import change
 from .models import Article, Comment, Images
+from django.db.models import Count, F
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
-    CommentSerializer, ChangeSerializer,
+    CommentSerializer,
+    HomeSerializer,
+    ChangeSerializer,
 )
 import ast
 
+
+class HomeView(APIView):
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 10  # 페이지당 10개의 항목을 보여줌
+
+    def get(self, request):
+        """홈 화면에서 게시글 목록을 반환"""
+        order_by = request.query_params.get("order_by")
+
+        if order_by == "likes":
+            articles = Article.objects.all().order_by("-likes", "-created_at")
+        elif order_by == "latest":
+            articles = Article.objects.all().order_by("-created_at")
+        elif order_by == "comments":
+            articles = Article.objects.annotate(
+                comment_count=Count("comments")
+            ).order_by("-comment_count", "-created_at")
+        else:
+            articles = Article.objects.all().order_by("-created_at")
+
+        # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
+        paginator = self.pagination_class()
+        paginated_articles = paginator.paginate_queryset(articles, request)
+
+        serializer = HomeSerializer(paginated_articles, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ArticleView(APIView):
@@ -53,7 +84,6 @@ class ArticleView(APIView):
         article = get_object_or_404(Article, id=article_id)
         delete_images = request.data.get("delete_images", [])
         delete_images = ast.literal_eval(delete_images)
-        # 이미지 인덱스(id)가 게시글에 종속되었는지 체크해줘야 함!
 
         if request.user == article.user:
             serializer = ArticleCreateSerializer(
