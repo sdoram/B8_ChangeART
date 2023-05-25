@@ -52,7 +52,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("content", "nickname", "created_at", "updated_at")
+        fields = (
+            "content",
+            "nickname",
+            "created_at",
+            "updated_at",
+            "user_id",
+            "article_id",
+            "id",
+        )
 
     def get_nickname(self, obj):
         return obj.user.nickname
@@ -83,9 +91,13 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
 
 class ChangeSerializer(serializers.ModelSerializer):
     """이미지 변환 시리얼라이저"""
+
     class Meta:
         model = Change
-        fields = ('before_image', 'after_image',)
+        fields = (
+            "before_image",
+            "after_image",
+        )
 
 
 class HomeSerializer(serializers.ModelSerializer):
