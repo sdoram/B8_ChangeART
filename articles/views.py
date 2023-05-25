@@ -9,6 +9,7 @@ Todo:
     * 다중 이미지 처리 view 만들기
 
 """
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
@@ -27,6 +28,8 @@ import ast
 
 class HomeView(APIView):
     permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 10  # 페이지당 10개의 항목을 보여줌
 
     def get(self, request):
         """홈 화면에서 게시글 목록을 반환"""
@@ -43,8 +46,12 @@ class HomeView(APIView):
         else:
             articles = Article.objects.all().order_by("-created_at")
 
-        serializer = HomeSerializer(articles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
+        paginator = self.pagination_class()
+        paginated_articles = paginator.paginate_queryset(articles, request)
+
+        serializer = HomeSerializer(paginated_articles, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ArticleView(APIView):
