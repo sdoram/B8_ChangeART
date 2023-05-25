@@ -25,11 +25,14 @@ class AthntCodeCreateView(APIView):
             return Response(
                 {"message": "이미 가입된 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST
             )
+        code = Verify.objects.filter(email=email)
+        if code.exists():
+            code.delete()
         athnt_code = str(randint(1, 999999)).zfill(6)
         message = EmailMessage(
             "ChangeART [Verification Code]",
             f"인증코드 [{athnt_code}]",
-            "changeart@gmail.com",
+            "HOST@gmail.com",
             [email],
         )
         authen_Code = Verify(email=email, athnt_code=athnt_code)

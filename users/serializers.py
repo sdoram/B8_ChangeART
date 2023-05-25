@@ -39,7 +39,6 @@ class VerifySerializer(serializers.Serializer):
             return data
 
 
-
 # 마이페이지의 팔로잉 리스트
 class FollowListSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField()
@@ -57,7 +56,6 @@ class UserArticlesSerializer(serializers.ModelSerializer):
         model = Article
         fields = "__all__"
 
-        
 
 # 마이페이지용
 class UserPageSerializer(serializers.ModelSerializer):
@@ -92,4 +90,5 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token["email"] = user.email
+        token["nickname"] = user.nickname
         return token
