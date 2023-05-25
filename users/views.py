@@ -70,7 +70,6 @@ class MyPageView(APIView):
     # 내 정보 보기
     def get(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
-
         serializer = UserPageSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -93,7 +92,7 @@ class MyPageView(APIView):
         if request.user == user:
             user.is_active = False
             user.save()
-            return Response({"message": "탈퇴하셨습니다."}, status=status.HTTP_200_OK)
+            return Response({"message": "탈퇴하셨습니다"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "권한이 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
          
@@ -106,7 +105,7 @@ class FollowView(APIView):
         user = request.user                                   # 나
         if user in following_user.following.all():
             following_user.following.remove(user)
-            return Response({"message": "팔로우 취소"}, status=status.HTTP_200_OK)
+            return Response({"message": "팔로우를 취소했습니다"}, status=status.HTTP_200_OK)
         else:
             following_user.following.add(user)
-            return Response({"message": "팔로우"}, status=status.HTTP_200_OK)
+            return Response({"message": "팔로우했습니다"}, status=status.HTTP_200_OK)
