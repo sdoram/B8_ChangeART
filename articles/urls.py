@@ -12,4 +12,5 @@ urlpatterns = [
     ),
     path("<int:article_id>/comment/", views.CommentView.as_view(), name="comment_view"),
     path("comment/<int:comment_id>/", views.CommentView.as_view(), name="comment_view"),
+    path("change/", views.ChangePostView.as_view(), name="change_post_view"),
 ]

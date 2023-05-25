@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Article, Comment, Images
+from .models import Article, Comment, Images, Change
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -79,6 +79,13 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = "__all__"
+
+
+class ChangeSerializer(serializers.ModelSerializer):
+    """이미지 변환 시리얼라이저"""
+    class Meta:
+        model = Change
+        fields = ('before_image', 'after_image',)
 
 
 class HomeSerializer(serializers.ModelSerializer):
