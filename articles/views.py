@@ -15,13 +15,36 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Article, Comment, Images
+from django.db.models import Count, F
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
+    HomeSerializer,
 )
 import ast
 
+
+class HomeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        """홈 화면에서 게시글 목록을 반환"""
+        order_by = request.query_params.get("order_by")
+
+        if order_by == "likes":
+            articles = Article.objects.all().order_by("-likes", "-created_at")
+        elif order_by == "latest":
+            articles = Article.objects.all().order_by("-created_at")
+        elif order_by == "comments":
+            articles = Article.objects.annotate(
+                comment_count=Count("comments")
+            ).order_by("-comment_count", "-created_at")
+        else:
+            articles = Article.objects.all().order_by("-created_at")
+
+        serializer = HomeSerializer(articles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ArticleView(APIView):
@@ -51,7 +74,6 @@ class ArticleView(APIView):
         article = get_object_or_404(Article, id=article_id)
         delete_images = request.data.get("delete_images", [])
         delete_images = ast.literal_eval(delete_images)
-        # 이미지 인덱스(id)가 게시글에 종속되었는지 체크해줘야 함!
 
         if request.user == article.user:
             serializer = ArticleCreateSerializer(

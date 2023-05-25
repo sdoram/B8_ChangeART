@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User
+from rest_framework.generics import get_object_or_404
+from .models import User, Verify
 from articles.models import Article
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -38,6 +39,7 @@ class VerifySerializer(serializers.Serializer):
             return data
 
 
+
 # 마이페이지의 팔로잉 리스트
 class FollowListSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField()
@@ -55,6 +57,7 @@ class UserArticlesSerializer(serializers.ModelSerializer):
         model = Article
         fields = "__all__"
 
+        
 
 # 마이페이지용
 class UserPageSerializer(serializers.ModelSerializer):
@@ -75,10 +78,6 @@ class UserPageSerializer(serializers.ModelSerializer):
             "following_list",
             "user_articles",
         ]
-
-    def get_following_count(self, obj):
-        following_count = User.objects.filter(following=obj).count()
-        return following_count
 
     def get_followers_count(self, obj):
         return obj.following.count()
