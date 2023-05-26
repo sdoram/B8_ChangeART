@@ -101,12 +101,12 @@ class ChangeSerializer(serializers.ModelSerializer):
 
 
 class HomeSerializer(serializers.ModelSerializer):
-    """메인페이지 시리얼라이저"""
-
     user = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
+    like = serializers.StringRelatedField(many=True)
     like_count = serializers.SerializerMethodField()
     comments = CommentSerializer(source="comment_set", many=True)
+    comments_count = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     def get_user(self, obj):
@@ -117,6 +117,9 @@ class HomeSerializer(serializers.ModelSerializer):
 
     def get_like_count(self, obj):
         return obj.like.count()
+
+    def get_comments_count(self, obj):
+        return obj.comment_set.count()
 
     def get_image(self, obj):
         if obj.images_set.exists():
@@ -131,4 +134,43 @@ class HomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        exclude = ["like"]
+        fields = "__all__"
+
+
+class HomeListSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        return obj.user.nickname
+
+    def get_like_count(self, obj):
+        return obj.like.count()
+
+    def get_comments_count(self, obj):
+        return obj.comment_set.count()
+
+    def get_image(self, obj):
+        if obj.images_set.exists():
+            first_image = obj.images_set.first()
+            return {
+                "id": first_image.id,
+                "image": first_image.image.url,
+                "article": obj.id,
+            }
+        else:
+            return None
+
+    class Meta:
+        model = Article
+        fields = (
+            "pk",
+            "title",
+            "image",
+            "created_at",
+            "user",
+            "like_count",
+            "comments_count",
+        )
