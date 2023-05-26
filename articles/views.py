@@ -18,12 +18,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .change import change
 from .models import Article, Comment, Images
-from django.db.models import Count, F
+
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
-    HomeSerializer,
+    HomeListSerializer,
     ChangeSerializer,
 )
 import ast
@@ -32,28 +32,28 @@ import ast
 class HomeView(APIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 10  # 페이지당 10개의 항목을 보여줌
+    pagination_class.page_size = 9  # 페이지당 9개의 항목을 보여줌
 
     def get(self, request):
-        """홈 화면에서 게시글 목록을 반환"""
+        articles = Article.objects.all()
+        serializer = HomeListSerializer(articles, many=True)
         order_by = request.query_params.get("order_by")
 
-        if order_by == "likes":
-            articles = Article.objects.all().order_by("-likes", "-created_at")
-        elif order_by == "latest":
+        if order_by == "latest":
             articles = Article.objects.all().order_by("-created_at")
+        elif order_by == "likes":
+            articles = Article.objects.all().order_by("-like_count", "-created_at")
         elif order_by == "comments":
-            articles = Article.objects.annotate(
-                comment_count=Count("comments")
-            ).order_by("-comment_count", "-created_at")
+            articles = Article.objects.all().order_by("-comments_count", "-created_at")
         else:
             articles = Article.objects.all().order_by("-created_at")
+        print(order_by)
 
         # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
         paginator = self.pagination_class()
         paginated_articles = paginator.paginate_queryset(articles, request)
 
-        serializer = HomeSerializer(paginated_articles, many=True)
+        serializer = HomeListSerializer(paginated_articles, many=True)
         return paginator.get_paginated_response(serializer.data)
 
 
