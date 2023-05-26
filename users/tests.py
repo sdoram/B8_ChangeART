@@ -10,7 +10,7 @@ class AthntCodeCreateViewTest(APITestCase):
         data = {"email": "test@test.com"}
 
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "이메일을 보냈습니다.")
 
 
 class SignupViewTest(APITestCase):
@@ -32,7 +32,7 @@ class SignupViewTest(APITestCase):
             "verify_code": self.verify.athnt_code,
         }
         response = self.client.post(url, user_data)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["message"], "가입완료!")
 
 
 class LoginViewTest(APITestCase):
@@ -59,7 +59,7 @@ class MyPageViewTest(APITestCase):
 
     def test_get_user(self):
         response = self.client.get(path=reverse("my_page_view", args=[self.user.id]))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["nickname"], "테스트")
 
     def test_put_user(self):
         response = self.client.put(
@@ -67,14 +67,14 @@ class MyPageViewTest(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
             data=self.put_data,
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "수정이 되었습니다.")
 
     def test_delete_user(self):
         response = self.client.delete(
             path=reverse("my_page_view", args=[self.user.id]),
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "탈퇴하셨습니다")
 
 
 class FollowViewTest(APITestCase):
@@ -95,4 +95,12 @@ class FollowViewTest(APITestCase):
             path=reverse("follow_view", args=[self.to_user.id]),
             HTTP_AUTHORIZATION=f"Bearer {self.from_user_access_token}",
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["message"], "팔로우했습니다")
+
+    def test_un_follow_user(self):
+        for _ in range(2):
+            response = self.client.post(
+                path=reverse("follow_view", args=[self.to_user.id]),
+                HTTP_AUTHORIZATION=f"Bearer {self.from_user_access_token}",
+            )
+        self.assertEqual(response.data["message"], "팔로우를 취소했습니다")
