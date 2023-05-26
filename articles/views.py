@@ -75,7 +75,10 @@ class ArticleView(APIView):
 
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response({"message": "게시글을 등록했습니다."}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "게시글을 등록했습니다.", "article_id": serializer.instance.id},
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -209,6 +212,7 @@ class CommentView(APIView):
                 {"message": "delete 요청 실패"}, status=status.HTTP_403_FORBIDDEN
             )
 
+
 class ChangePostView(APIView):
     def post(self, request):
         serializer = ChangeSerializer(data=request.data)
@@ -218,11 +222,10 @@ class ChangePostView(APIView):
             change(bf_img, serializer)
 
             image_name = str(bf_img)
-            name2 = image_name[image_name.index('/') + 1:]
+            name2 = image_name[image_name.index("/") + 1 :]
 
             serializer.save(after_image=f"after_image/{name2}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
