@@ -41,13 +41,13 @@ class VerifySerializer(serializers.Serializer):
 
 # 마이페이지의 팔로잉 리스트
 class FollowListSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="id")
     nickname = serializers.CharField()
     profile_image = serializers.ImageField()
 
     class Meta:
         model = User
-        fields = ["nickname", "profile_image"]
-        # ordering = ["id"]
+        fields = ["user_id", "nickname", "profile_image"]
 
 
 # 마이페이지의 게시글
