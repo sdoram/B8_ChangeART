@@ -18,6 +18,7 @@ class Article(models.Model):
     def __str__(self):
         return str(self.title)
 
+
 # 다중이미지 모델
 class Images(models.Model):
     article = models.ForeignKey(
@@ -41,9 +42,13 @@ class Comment(models.Model):
     def __str__(self):
         return self.content
 
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class Change(models.Model):
     class Meta:
-        db_table = 'image'
+        db_table = "image"
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     before_image = models.ImageField(upload_to="before_image", blank=True, null=True)
