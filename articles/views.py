@@ -23,7 +23,7 @@ from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
-    HomeListSerializer,
+    HomeSerializer,
     ChangeSerializer,
 )
 import ast
@@ -36,7 +36,7 @@ class HomeView(APIView):
 
     def get(self, request):
         articles = Article.objects.all()
-        serializer = HomeListSerializer(articles, many=True)
+        serializer = HomeSerializer(articles, many=True)
         order_by = request.query_params.get("order_by")
 
         if order_by == "latest":
@@ -53,7 +53,7 @@ class HomeView(APIView):
         paginator = self.pagination_class()
         paginated_articles = paginator.paginate_queryset(articles, request)
 
-        serializer = HomeListSerializer(paginated_articles, many=True)
+        serializer = HomeSerializer(paginated_articles, many=True)
         return paginator.get_paginated_response(serializer.data)
 
 

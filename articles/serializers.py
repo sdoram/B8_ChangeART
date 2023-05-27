@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Article, Comment, Images, Change
+from users.serializers import UserProfileImageSerializer
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -46,7 +47,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """댓글 시리얼라이저"""
+    """댓글 작성, 수정, 삭제시리얼라이저"""
 
     nickname = serializers.SerializerMethodField()
 
@@ -66,14 +67,38 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.user.nickname
 
 
+class CommentDetailSerializer(serializers.ModelSerializer):
+    """게시글 상세보기에서 댓글 get용 시리얼라이저"""
+
+    profile_image = UserProfileImageSerializer(source="user", read_only=True)
+    nickname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = (
+            "content",
+            "nickname",
+            "created_at",
+            "updated_at",
+            "user_id",
+            "article_id",
+            "id",
+            "profile_image",
+        )
+
+    def get_nickname(self, obj):
+        return obj.user.nickname
+
+
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """게시글 상세보기 시리얼라이저(좋아요, 댓글까지)"""
 
     user = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
-    comments = CommentSerializer(source="comment_set", many=True)
+    comments = CommentDetailSerializer(source="comment_set", many=True)
     images = ImageSerializer(source="images_set", many=True, read_only=True)
+    profile_image = UserProfileImageSerializer(source="user", read_only=True)
 
     def get_user(self, obj):
         return obj.user.nickname
