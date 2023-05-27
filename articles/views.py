@@ -39,7 +39,7 @@ class HomeView(APIView):
     def get(self, request):
         articles = Article.objects.all()
         # serializer = HomeSerializer(articles, many=True)
-        current_order = request.query_params.get("order_by", None)
+        current_order = request.query_params.get("order", None)
         # articles = HomeSerializer(articles, many=True)
         if current_order == "latest":
             articles = Article.objects.order_by("-created_at")
