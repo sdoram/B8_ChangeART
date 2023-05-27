@@ -7,13 +7,14 @@ from articles.models import Change
 from PIL import Image
 
 
-def change(img, serializer):
+def change(image_file, serializer):
     now = uuid.uuid4()
     queryset = Change.objects.all()
     if queryset.exists():
         change_post = queryset.order_by('-id').first()
     net = cv2.dnn.readNetFromTorch('articles/models/mosaic.t7')
-    data = cv2.imread((f'.{img}'))
+    image_path = "media/before_image/" + str(image_file)
+    data = cv2.imread(image_path)
 
     # 인코딩 및 디코딩
     encoded_img = np.fromstring(data, dtype=np.uint8)
@@ -39,5 +40,5 @@ def change(img, serializer):
     change_image = f"after_image/{change_post.user.nickname}_{now}.jpg"
     # cv2.imwrite(f"./media/after_image/{change_image}", output)
     output.save(f"./media/{change_image}", "JPEG")
-    change_post.change_image = change_image
+    change_post.after_image = change_image
     change_post.save()
