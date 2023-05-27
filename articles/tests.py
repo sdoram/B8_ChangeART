@@ -1,7 +1,11 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import User
+from faker import Faker
+
+from users.models import User
+from .models import Article
+from .serializers import ArticleDetailSerializer
 
 # 임시 이미지 생성용 패키지
 from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
@@ -28,6 +32,17 @@ class ArticleViewTest(APITestCase):
         cls.user = User.objects.create_user("article@test.com", "테스트", "1234")
         cls.login_data = {"email": "article@test.com", "password": "1234"}
         cls.article_data = {"title": "게시글 제목", "content": "게시글 내용"}
+        cls.faker = Faker()
+        cls.articles = []
+        for _ in range(10):
+            cls.user = User.objects.create_user(
+                f"{cls.faker.last_name()}@test.com", cls.faker.word(), cls.faker.word()
+            )
+            cls.articles.append(
+                Article.objects.create(
+                    title=cls.faker.sentence(), content=cls.faker.text(), user=cls.user
+                )
+            )
 
     def setUp(self):
         self.access_token = self.client.post(
@@ -62,6 +77,14 @@ class ArticleViewTest(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
         )
         self.assertEqual(response.data["message"], "게시글을 등록했습니다.")
+
+    def test_get_article(self):
+        for article in self.articles:
+            url = article.get_absolute_url()
+            response = self.client.get(url)
+            serializer = ArticleDetailSerializer(article).data
+            for key, value in serializer.items():
+                self.assertEqual(response.data[key], value)
 
 
 class ArticleLikeViewTest(APITestCase):

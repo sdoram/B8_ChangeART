@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User
+from django.urls import reverse
 
 
 # 게시글 모델
@@ -17,6 +18,9 @@ class Article(models.Model):
     # ----- 게시글 카운트 추가 수정 -----
     # like_count = models.IntegerField("좋아요 수", default=0)
     # comments_count = models.IntegerField("댓글 수", default=0)
+
+    def get_absolute_url(self):
+        return reverse("article_detail_view", kwargs={"article_id": self.pk})
 
     def __str__(self):
         return str(self.title)
