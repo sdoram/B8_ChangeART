@@ -15,8 +15,8 @@ class Article(models.Model):
         User, verbose_name="좋아요", related_name="like_article", blank=True
     )
     # ----- 게시글 카운트 추가 수정 -----
-    like_count = models.IntegerField("좋아요 수", default=0)
-    comments_count = models.IntegerField("댓글 수", default=0)
+    # like_count = models.IntegerField("좋아요 수", default=0)
+    # comments_count = models.IntegerField("댓글 수", default=0)
 
     def __str__(self):
         return str(self.title)
