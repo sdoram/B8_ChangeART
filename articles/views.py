@@ -9,6 +9,7 @@ Todo:
     * 다중 이미지 처리 view 만들기
 
 """
+from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.views import APIView
@@ -19,10 +20,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .change import change
 from .models import Article, Comment, Images, Change
 from django.db.models import Count, F
+
 from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
+    # HomeListSerializer,
     HomeSerializer,
     ChangeSerializer,
 )
@@ -32,22 +35,23 @@ import ast
 class HomeView(APIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 10  # 페이지당 10개의 항목을 보여줌
+    pagination_class.page_size = 9  # 페이지당 9개의 항목을 보여줌
 
     def get(self, request):
-        """홈 화면에서 게시글 목록을 반환"""
-        order_by = request.query_params.get("order_by")
-
-        if order_by == "likes":
-            articles = Article.objects.all().order_by("-likes", "-created_at")
-        elif order_by == "latest":
-            articles = Article.objects.all().order_by("-created_at")
-        elif order_by == "comments":
+        articles = Article.objects.all()
+        # serializer = HomeSerializer(articles, many=True)
+        current_order = request.query_params.get("order", None)
+        # articles = HomeSerializer(articles, many=True)
+        if current_order == "latest":
+            articles = Article.objects.order_by("-created_at")
+        if current_order == "likes":
+            articles = Article.objects.annotate(likes_count=Count("like")).order_by(
+                "-likes_count"
+            )
+        elif current_order == "comments":
             articles = Article.objects.annotate(
-                comment_count=Count("comments")
-            ).order_by("-comment_count", "-created_at")
-        else:
-            articles = Article.objects.all().order_by("-created_at")
+                comments_count=Count("comment")
+            ).order_by("-comments_count")
 
         # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
         paginator = self.pagination_class()
@@ -75,7 +79,10 @@ class ArticleView(APIView):
 
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response({"message": "게시글을 등록했습니다."}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "게시글을 등록했습니다.", "article_id": serializer.instance.id},
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -209,6 +216,7 @@ class CommentView(APIView):
                 {"message": "delete 요청 실패"}, status=status.HTTP_403_FORBIDDEN
             )
 
+
 class ChangePostView(APIView):
     """이미지 변환"""
 
@@ -234,9 +242,9 @@ class ChangePostView(APIView):
             image_name = str(image)
             name2 = image_name[image_name.index('/') + 1:]
 
+
             serializer.save(after_image=f"after_image/{name2}")
             return Response(serializer.data(), status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

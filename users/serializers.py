@@ -41,20 +41,33 @@ class VerifySerializer(serializers.Serializer):
 
 # 마이페이지의 팔로잉 리스트
 class FollowListSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="id")
     nickname = serializers.CharField()
     profile_image = serializers.ImageField()
 
     class Meta:
         model = User
-        fields = ["nickname", "profile_image"]
-        # ordering = ["id"]
+        fields = ["user_id", "nickname", "profile_image"]
 
 
 # 마이페이지의 게시글
 class UserArticlesSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Article
         fields = "__all__"
+
+    def get_image(self, obj):
+        if obj.images_set.exists():
+            first_image = obj.images_set.first()
+            return {
+                "id": first_image.id,
+                "image": first_image.image.url,
+                "article": obj.id,
+            }
+        else:
+            return None
 
 
 # 마이페이지용
@@ -92,3 +105,14 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["email"] = user.email
         token["nickname"] = user.nickname
         return token
+
+
+# 프로필이미지
+class UserProfileImageSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField()
+
+    class Meta:
+        model = User
+        fields = [
+            "profile_image",
+        ]

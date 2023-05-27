@@ -14,9 +14,13 @@ class Article(models.Model):
     like = models.ManyToManyField(
         User, verbose_name="좋아요", related_name="like_article", blank=True
     )
+    # ----- 게시글 카운트 추가 수정 -----
+    # like_count = models.IntegerField("좋아요 수", default=0)
+    # comments_count = models.IntegerField("댓글 수", default=0)
 
     def __str__(self):
         return str(self.title)
+
 
 # 다중이미지 모델
 class Images(models.Model):
@@ -41,9 +45,13 @@ class Comment(models.Model):
     def __str__(self):
         return self.content
 
+    class Meta:
+        ordering = ["-created_at"]
+
+
 class Change(models.Model):
     class Meta:
-        db_table = 'image'
+        db_table = "image"
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     before_image = models.ImageField(upload_to="before_image", blank=True, null=True)

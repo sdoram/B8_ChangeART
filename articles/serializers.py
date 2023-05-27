@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Article, Comment, Images, Change
+from users.serializers import UserProfileImageSerializer
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -46,7 +47,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """댓글 시리얼라이저"""
+    """댓글 작성, 수정, 삭제시리얼라이저"""
 
     nickname = serializers.SerializerMethodField()
 
@@ -66,14 +67,38 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.user.nickname
 
 
+class CommentDetailSerializer(serializers.ModelSerializer):
+    """게시글 상세보기에서 댓글 get용 시리얼라이저"""
+
+    profile_image = UserProfileImageSerializer(source="user", read_only=True)
+    nickname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = (
+            "content",
+            "nickname",
+            "created_at",
+            "updated_at",
+            "user_id",
+            "article_id",
+            "id",
+            "profile_image",
+        )
+
+    def get_nickname(self, obj):
+        return obj.user.nickname
+
+
 class ArticleDetailSerializer(serializers.ModelSerializer):
     """게시글 상세보기 시리얼라이저(좋아요, 댓글까지)"""
 
     user = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
-    comments = CommentSerializer(source="comment_set", many=True)
+    comments = CommentDetailSerializer(source="comment_set", many=True)
     images = ImageSerializer(source="images_set", many=True, read_only=True)
+    profile_image = UserProfileImageSerializer(source="user", read_only=True)
 
     def get_user(self, obj):
         return obj.user.nickname
@@ -101,22 +126,28 @@ class ChangeSerializer(serializers.ModelSerializer):
 
 
 class HomeSerializer(serializers.ModelSerializer):
-    """메인페이지 시리얼라이저"""
-
-    user = serializers.SerializerMethodField()
-    user_id = serializers.SerializerMethodField()
+    # 시리얼라이저로 필요한 필드
+    # 좋아요 개수 카운팅
     like_count = serializers.SerializerMethodField()
-    comments = CommentSerializer(source="comment_set", many=True)
+    # 댓글 개수 카운팅
+    comments_count = serializers.SerializerMethodField()
+    # 이미지 개수 1개만 미리보기
     image = serializers.SerializerMethodField()
+    # user = serializers.SerializerMethodField()
+    # user_id = serializers.SerializerMethodField()
+    # like = serializers.StringRelatedField(many=True)
+    # comments = CommentSerializer(source="comment_set", many=True)
 
-    def get_user(self, obj):
-        return obj.user.nickname
+    # def get_user(self, obj):
+    #     return obj.user.nickname
 
-    def get_user_id(self, obj):
-        return obj.user.id
+    # def get_user_id(self, obj):s
 
     def get_like_count(self, obj):
         return obj.like.count()
+
+    def get_comments_count(self, obj):
+        return obj.comment_set.count()
 
     def get_image(self, obj):
         if obj.images_set.exists():
@@ -131,4 +162,43 @@ class HomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        exclude = ["like"]
+        fields = "__all__"
+
+
+# class HomeListSerializer(serializers.ModelSerializer):
+#     user = serializers.SerializerMethodField()
+#     like_count = serializers.SerializerMethodField()
+#     # comments_count = serializers.SerializerMethodField()
+#     image = serializers.SerializerMethodField()
+
+#     def get_user(self, obj):
+#         return obj.user.nickname
+
+#     def get_like_count(self, obj):
+#         return obj.like.count()
+
+#     # def get_comments_count(self, obj):
+#     #     return obj.comment_set.count()
+
+#     def get_image(self, obj):
+#         if obj.images_set.exists():
+#             first_image = obj.images_set.first()
+#             return {
+#                 "id": first_image.id,
+#                 "image": first_image.image.url,
+#                 "article": obj.id,
+#             }
+#         else:
+#             return None
+
+#     class Meta:
+#         model = Article
+#         fields = (
+#             "pk",
+#             "title",
+#             "image",
+#             "created_at",
+#             "user",
+#             # "like_count",
+#             "comments_count",
+#         )
