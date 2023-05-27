@@ -24,7 +24,7 @@ from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
-    HomeListSerializer,
+    # HomeListSerializer,
     HomeSerializer,
     ChangeSerializer,
 )
