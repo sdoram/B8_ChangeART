@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .change import change
-from .models import Article, Comment, Images
+from .models import Article, Comment, Images, Change
 from django.db.models import Count, F
 from .serializers import (
     ArticleCreateSerializer,
@@ -210,18 +210,32 @@ class CommentView(APIView):
             )
 
 class ChangePostView(APIView):
+    """이미지 변환"""
+
+    """
+    이미지 변환 코드를 불러오고 이미지의 이름을 바꿔줍니다.
+
+        Args:
+            request.data : 변환 전 이미지
+
+        Returns:
+            HTTP_201_CREATED : 이미지 변환 성공
+
+            HTTP_400_BAD_REQUEST : validation 실패
+    """
+
     def post(self, request):
         serializer = ChangeSerializer(data=request.data)
         if serializer.is_valid():
-            image = serializer.save(user=request.user)
-            bf_img = image.before_image
-            change(bf_img, serializer)
+            serializer.save(user=request.user)
+            image = serializer.data["before_image"]
+            change(image, serializer)
 
-            image_name = str(bf_img)
+            image_name = str(image)
             name2 = image_name[image_name.index('/') + 1:]
 
             serializer.save(after_image=f"after_image/{name2}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data(), status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
