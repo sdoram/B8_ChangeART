@@ -52,9 +52,22 @@ class FollowListSerializer(serializers.ModelSerializer):
 
 # 마이페이지의 게시글
 class UserArticlesSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Article
         fields = "__all__"
+
+    def get_image(self, obj):
+        if obj.images_set.exists():
+            first_image = obj.images_set.first()
+            return {
+                "id": first_image.id,
+                "image": first_image.image.url,
+                "article": obj.id,
+            }
+        else:
+            return None
 
 
 # 마이페이지용
