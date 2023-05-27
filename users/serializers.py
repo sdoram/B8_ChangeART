@@ -92,3 +92,14 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["email"] = user.email
         token["nickname"] = user.nickname
         return token
+
+
+# 프로필이미지
+class UserProfileImageSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField()
+
+    class Meta:
+        model = User
+        fields = [
+            "profile_image",
+        ]
