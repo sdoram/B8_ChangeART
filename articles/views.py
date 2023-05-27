@@ -244,7 +244,7 @@ class ChangePostView(APIView):
 
 
             serializer.save(after_image=f"after_image/{name2}")
-            return Response(serializer.data(), status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
