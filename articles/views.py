@@ -42,9 +42,9 @@ class HomeView(APIView):
         # serializer = HomeSerializer(articles, many=True)
         current_order = request.query_params.get("order", None)
         # articles = HomeSerializer(articles, many=True)
-        if current_order == "latest":
-            articles = Article.objects.order_by("-created_at")
-        if current_order == "likes":
+        if current_order == "outdated":
+            articles = Article.objects.order_by("created_at")
+        elif current_order == "likes":
             articles = Article.objects.annotate(likes_count=Count("like")).order_by(
                 "-likes_count"
             )
@@ -52,6 +52,8 @@ class HomeView(APIView):
             articles = Article.objects.annotate(
                 comments_count=Count("comment")
             ).order_by("-comments_count")
+        elif current_order == None:
+            articles = Article.objects.order_by("-created_at")
 
         # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
         paginator = self.pagination_class()
