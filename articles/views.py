@@ -9,6 +9,7 @@ Todo:
     * 다중 이미지 처리 view 만들기
 
 """
+from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.views import APIView
@@ -24,6 +25,7 @@ from .serializers import (
     ArticleDetailSerializer,
     CommentSerializer,
     HomeListSerializer,
+    HomeSerializer,
     ChangeSerializer,
 )
 import ast
@@ -36,24 +38,25 @@ class HomeView(APIView):
 
     def get(self, request):
         articles = Article.objects.all()
-        serializer = HomeListSerializer(articles, many=True)
-        order_by = request.query_params.get("order_by")
-
-        if order_by == "latest":
-            articles = Article.objects.all().order_by("-created_at")
-        elif order_by == "likes":
-            articles = Article.objects.all().order_by("-like_count", "-created_at")
-        elif order_by == "comments":
-            articles = Article.objects.all().order_by("-comments_count", "-created_at")
-        else:
-            articles = Article.objects.all().order_by("-created_at")
-        print(order_by)
+        # serializer = HomeSerializer(articles, many=True)
+        current_order = request.query_params.get("order_by", None)
+        # articles = HomeSerializer(articles, many=True)
+        if current_order == "latest":
+            articles = Article.objects.order_by("-created_at")
+        if current_order == "likes":
+            articles = Article.objects.annotate(likes_count=Count("like")).order_by(
+                "-likes_count"
+            )
+        elif current_order == "comments":
+            articles = Article.objects.annotate(
+                comments_count=Count("comment")
+            ).order_by("-comments_count")
 
         # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
         paginator = self.pagination_class()
         paginated_articles = paginator.paginate_queryset(articles, request)
 
-        serializer = HomeListSerializer(paginated_articles, many=True)
+        serializer = HomeSerializer(paginated_articles, many=True)
         return paginator.get_paginated_response(serializer.data)
 
 
