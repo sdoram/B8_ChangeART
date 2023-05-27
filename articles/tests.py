@@ -34,9 +34,9 @@ class ArticleViewTest(APITestCase):
         cls.article_data = {"title": "게시글 제목", "content": "게시글 내용"}
         cls.faker = Faker()
         cls.articles = []
-        for _ in range(10):
+        for i in range(5):
             cls.user = User.objects.create_user(
-                f"{cls.faker.last_name()}@test.com", cls.faker.word(), cls.faker.word()
+                f"{i}@test.com", cls.faker.word(), cls.faker.word()
             )
             cls.articles.append(
                 Article.objects.create(
@@ -88,11 +88,85 @@ class ArticleViewTest(APITestCase):
 
 
 class ArticleLikeViewTest(APITestCase):
-    pass
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user("article@test.com", "테스트", "1234")
+        cls.login_data = {"email": "article@test.com", "password": "1234"}
+        cls.faker = Faker()
+        cls.articles = []
+        for i in range(5):
+            cls.user = User.objects.create_user(
+                f"{i}@test.com", cls.faker.word(), cls.faker.word()
+            )
+            cls.articles.append(
+                Article.objects.create(
+                    title=cls.faker.sentence(), content=cls.faker.text(), user=cls.user
+                )
+            )
+
+    def setUp(self):
+        self.access_token = self.client.post(
+            reverse("login_view"), self.login_data
+        ).data["access"]
+
+    def test_article_like(self):
+        for article in self.articles:
+            url = article.get_absolute_url()
+            for _ in range(2):
+                response = self.client.post(
+                    path=reverse("article_like_view", args=[url.split("/")[1]]),
+                    HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+                )
+                self.assertEqual(response.status_code, 200)
 
 
 class CommentViewTest(APITestCase):
-    pass
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user("article@test.com", "테스트", "1234")
+        cls.login_data = {"email": "article@test.com", "password": "1234"}
+        cls.faker = Faker()
+        cls.article = Article.objects.create(
+            title=cls.faker.sentence(), content=cls.faker.text(), user=cls.user
+        )
+        cls.article_id = cls.article.get_absolute_url().split("/")[1]
+        cls.data = {"content": "댓글 작성 테스트"}
+        cls.put_data = {"content": "댓글 수정 테스트"}
+
+    def setUp(self):
+        self.access_token = self.client.post(
+            reverse("login_view"), self.login_data
+        ).data["access"]
+        self.before_comment = self.client.post(
+            path=reverse("comment_create_view", args=[self.article_id]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            data=self.data,
+        )
+        self.comment_id = self.before_comment.data["id"]
+
+    def test_post_comment(self):
+        response = self.client.post(
+            path=reverse("comment_create_view", args=[self.article_id]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            data=self.data,
+        )
+        self.assertEqual(response.data["content"], "댓글 작성 테스트")
+
+    def test_put_comment(self):
+        response = self.client.put(
+            path=reverse("comment_view", args=[self.comment_id]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            data=self.put_data,
+        )
+        self.assertEqual(response.data["content"], "댓글 수정 테스트")
+
+    def test_delete_comment(self):
+        response = self.client.delete(
+            path=reverse("comment_view", args=[self.comment_id]),
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}",
+            data=self.put_data,
+        )
+        self.assertEqual(response.data["message"], "댓글 삭제")
 
 
 class ChangePostViewTest(APITestCase):
