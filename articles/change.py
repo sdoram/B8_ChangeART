@@ -8,10 +8,11 @@ from PIL import Image
 
 
 def change(img, serializer):
-    change_post = Change.objects.get(id=serializer['id'])
     now = uuid.uuid4()
-
-    net = cv2.dnn.readNetFromTorch('models/candy.t7')
+    queryset = Change.objects.all()
+    if queryset.exists():
+        change_post = queryset.order_by('-id').first()
+    net = cv2.dnn.readNetFromTorch('articles/models/mosaic.t7')
     data = cv2.imread((f'.{img}'))
 
     # 인코딩 및 디코딩
