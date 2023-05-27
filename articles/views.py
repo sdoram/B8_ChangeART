@@ -27,7 +27,7 @@ from .serializers import (
     CommentSerializer,
     # HomeListSerializer,
     HomeSerializer,
-    ChangeSerializer,
+    ChangeSerializer, ImageChangeSerializer,
 )
 import ast
 
@@ -238,11 +238,16 @@ class ChangePostView(APIView):
             HTTP_400_BAD_REQUEST : validation 실패
     """
 
+    def get(self, request):
+        image = Change.objects.all()
+        serializer = ImageChangeSerializer(image, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def post(self, request):
         serializer = ChangeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
-            image = serializer.data["before_image"]
+            image = serializer.validated_data["before_image"]
             change(image, serializer)
 
             image_name = str(image)
@@ -251,5 +256,4 @@ class ChangePostView(APIView):
             serializer.save(after_image=f"after_image/{name2}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
