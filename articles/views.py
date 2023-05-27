@@ -152,6 +152,8 @@ class CommentView(APIView):
         Args:
             article_id : 보고있는 게시글의 PK
 
+            request.data['content'] : 댓글의 내용
+
         Returns:
             HTTP_200_OK : 댓글 작성 성공
 
@@ -174,14 +176,16 @@ class CommentView(APIView):
         Args:
             comment_id : 수정, 삭제를 하려는 댓글의 PK
 
+            request.data['content'] : 댓글의 내용
+
         Returns:
             HTTP_200_OK : 댓글 수정 성공
 
             HTTP_400_BAD_REQUEST : validation 실패
 
-            HTTP_404_NOT_FOUND : 댓글 연결 실패
-
             HTTP_403_FORBIDDEN : 댓글의 작성자가 아님
+
+            HTTP_404_NOT_FOUND : 댓글 연결 실패
         """
         comment = get_object_or_404(Comment, pk=comment_id)
         if request.user == comment.user:
@@ -203,9 +207,9 @@ class CommentView(APIView):
 
             HTTP_400_BAD_REQUEST : validation 실패
 
-            HTTP_404_NOT_FOUND : 댓글 연결 실패
-
             HTTP_403_FORBIDDEN : 댓글의 작성자가 아님
+
+            HTTP_404_NOT_FOUND : 댓글 연결 실패
         """
         comment = get_object_or_404(Comment, pk=comment_id)
         if request.user == comment.user:
@@ -240,8 +244,7 @@ class ChangePostView(APIView):
             change(image, serializer)
 
             image_name = str(image)
-            name2 = image_name[image_name.index('/') + 1:]
-
+            name2 = image_name[image_name.index("/") + 1 :]
 
             serializer.save(after_image=f"after_image/{name2}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
