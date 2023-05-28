@@ -2,12 +2,6 @@
 
     * user가 아닌 모든 view의 처리 
 
-Todo:
-
-    * HomeView 만들기
-    * 이미지 변환 view 만들기 
-    * 다중 이미지 처리 view 만들기
-
 """
 from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
@@ -26,7 +20,8 @@ from .serializers import (
     ArticleDetailSerializer,
     CommentSerializer,
     HomeSerializer,
-    ChangeSerializer, ImageChangeSerializer,
+    ChangeSerializer,
+    ImageChangeSerializer,
 )
 import ast
 
@@ -34,7 +29,6 @@ import ast
 class HomeView(APIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 9  # 페이지당 9개의 항목을 보여줌
 
     def get(self, request):
         current_order = request.query_params.get("order", None)
