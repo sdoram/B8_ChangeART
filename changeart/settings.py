@@ -133,7 +133,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 9,
 }
 
 MEDIA_ROOT = BASE_DIR / "media"
@@ -184,4 +186,3 @@ EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")  # 발신할 메일의 �
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
 AUTH_USER_MODEL = "users.User"
-

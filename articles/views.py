@@ -2,12 +2,6 @@
 
     * user가 아닌 모든 view의 처리 
 
-Todo:
-
-    * HomeView 만들기
-    * 이미지 변환 view 만들기 
-    * 다중 이미지 처리 view 만들기
-
 """
 from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
@@ -25,9 +19,9 @@ from .serializers import (
     ArticleCreateSerializer,
     ArticleDetailSerializer,
     CommentSerializer,
-    # HomeListSerializer,
     HomeSerializer,
-    ChangeSerializer, ImageChangeSerializer,
+    ChangeSerializer,
+    ImageChangeSerializer,
 )
 import ast
 
@@ -35,13 +29,9 @@ import ast
 class HomeView(APIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
-    pagination_class.page_size = 9  # 페이지당 9개의 항목을 보여줌
 
     def get(self, request):
-        articles = Article.objects.all()
-        # serializer = HomeSerializer(articles, many=True)
         current_order = request.query_params.get("order", None)
-        # articles = HomeSerializer(articles, many=True)
         if current_order == "outdated":
             articles = Article.objects.order_by("created_at")
         elif current_order == "likes":
@@ -52,7 +42,7 @@ class HomeView(APIView):
             articles = Article.objects.annotate(
                 comments_count=Count("comment")
             ).order_by("-comments_count")
-        elif current_order == None:
+        elif current_order is None:
             articles = Article.objects.order_by("-created_at")
 
         # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
@@ -238,9 +228,11 @@ class ChangePostView(APIView):
             HTTP_400_BAD_REQUEST : validation 실패
     """
 
+
     def get(self, request, change_id):
         image = get_object_or_404(Change, pk=change_id)
         serializer = ImageChangeSerializer(image)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -253,3 +245,4 @@ class ChangePostView(APIView):
             return Response(serializer.instance.id, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
