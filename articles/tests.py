@@ -1,6 +1,5 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
-from rest_framework import status
 from faker import Faker
 
 from users.models import User
@@ -20,10 +19,6 @@ def get_temporary_image(temp_file):
     image = Image.new("RGBA", size, color)
     image.save(temp_file, "png")
     return temp_file
-
-
-class HomeViewTest(APITestCase):
-    pass
 
 
 class ArticleViewTest(APITestCase):
@@ -167,7 +162,3 @@ class CommentViewTest(APITestCase):
             data=self.put_data,
         )
         self.assertEqual(response.data["message"], "댓글 삭제")
-
-
-class ChangePostViewTest(APITestCase):
-    pass

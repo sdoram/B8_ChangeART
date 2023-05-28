@@ -3,27 +3,25 @@
     * user가 아닌 모든 view의 처리 
 
 """
+import ast
 from django.db.models import Count
-from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .change import change
 from .models import Article, Comment, Images, Change
-from django.db.models import Count, F
-
 from .serializers import (
-    ArticleCreateSerializer,
-    ArticleDetailSerializer,
-    CommentSerializer,
     HomeSerializer,
     ChangeSerializer,
+    CommentSerializer,
     ImageChangeSerializer,
+    ArticleCreateSerializer,
+    ArticleDetailSerializer,
 )
-import ast
 
 
 class HomeView(APIView):
@@ -45,7 +43,6 @@ class HomeView(APIView):
         elif current_order is None:
             articles = Article.objects.order_by("-created_at")
 
-        # 페이지네이션을 적용하여 필요한 페이지의 항목만 가져옴
         paginator = self.pagination_class()
         paginated_articles = paginator.paginate_queryset(articles, request)
 
@@ -228,7 +225,6 @@ class ChangePostView(APIView):
             HTTP_400_BAD_REQUEST : validation 실패
     """
 
-
     def get(self, request, change_id):
         image = get_object_or_404(Change, pk=change_id)
         serializer = ImageChangeSerializer(image)
@@ -241,8 +237,7 @@ class ChangePostView(APIView):
             serializer.save(user=request.user)
             image = serializer.validated_data["before_image"]
             change(image, serializer)
-    # return에서 instance.id로 js에서 변환된 이미지를 찾을 수 있도록 데이터 보내기
+            # return에서 instance.id로 js에서 변환된 이미지를 찾을 수 있도록 데이터 보내기
             return Response(serializer.instance.id, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
