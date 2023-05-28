@@ -17,4 +17,10 @@ urlpatterns = [
     ),
     path("comment/<int:comment_id>/", views.CommentView.as_view(), name="comment_view"),
     path("change/", views.ChangePostView.as_view(), name="change_post_view"),
+    # path(
+    #     "change/<int:change_id>/",
+    #     views.ChangePostView.as_view(),
+    #     name="change_post_view",
+    # ),
+    # 변환한 이미지의 정보를 직접 확인하기 위해 change_id 받기
 ]

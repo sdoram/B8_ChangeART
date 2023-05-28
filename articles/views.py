@@ -228,6 +228,11 @@ class ChangePostView(APIView):
             HTTP_400_BAD_REQUEST : validation 실패
     """
 
+    # 변환된 이미지의 정보를 id로 가져오기
+    # def get(self, request, change_id):
+    #     image = get_object_or_404(Change, pk=change_id)
+    #     serializer = ImageChangeSerializer(image)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
     def get(self, request):
         image = Change.objects.all()
         serializer = ImageChangeSerializer(image, many=True)
@@ -247,3 +252,14 @@ class ChangePostView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def post(self, request):
+    #     serializer = ChangeSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save(user=request.user)
+    #         image = serializer.validated_data["before_image"]
+    #         change(image, serializer)
+    # return에서 instance.id로 js에서 변환된 이미지를 찾을 수 있도록 데이터 보내기
+    #         return Response(serializer.instance.id, status=status.HTTP_201_CREATED)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
