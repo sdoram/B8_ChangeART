@@ -36,9 +36,7 @@ def change(image_file, serializer):
     output = Image.fromarray(output)
 
     # 이미지 저장
-    change_image = f"after_image/{change_post.user.nickname}_{now}.jpg"
-    # change_image = f"after_image/{now}.jpg" #user nickname이 한글인 경우 생기는 문제 막기 위해 제거
-    # cv2.imwrite(f"./media/after_image/{change_image}", output)
+    change_image = f"after_image/{now}.jpg"     # user nickname이 한글인 경우 생기는 문제 막기 위해 제거
     output.save(f"./media/{change_image}", "JPEG")
     change_post.after_image = change_image
     change_post.save()
