@@ -1,19 +1,18 @@
 from random import randint
 from django.core.mail import EmailMessage
-from rest_framework.generics import get_object_or_404
-from rest_framework.views import APIView
 from rest_framework import status, permissions
+from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .serializers import UserSerializer, UserTokenObtainPairSerializer
 from .models import User, Verify
-from users.serializers import (
+from .serializers import (
     UserSerializer,
-    UserTokenObtainPairSerializer,
-    UserPageSerializer,
     VerifySerializer,
+    UserPageSerializer,
+    UserTokenObtainPairSerializer,
 )
 
 

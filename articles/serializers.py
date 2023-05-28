@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import Article, Comment, Images, Change
 from users.serializers import UserProfileImageSerializer
 
@@ -124,6 +125,7 @@ class ChangeSerializer(serializers.ModelSerializer):
             "after_image",
         )
 
+
 class ImageChangeSerializer(serializers.ModelSerializer):
     """이미지 저장 시에 사용하는 시리얼라이저
     수정 가능성 높음"""
@@ -132,9 +134,10 @@ class ImageChangeSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return obj.user.nickname
+
     class Meta:
         model = Change
-        fields = '__all__'
+        fields = "__all__"
 
 
 class HomeSerializer(serializers.ModelSerializer):

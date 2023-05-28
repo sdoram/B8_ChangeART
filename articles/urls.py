@@ -22,5 +22,4 @@ urlpatterns = [
         views.ChangePostView.as_view(),
         name="change_post_view",
     ),
-    # 변환한 이미지의 정보를 직접 확인하기 위해 change_id 받기
 ]
