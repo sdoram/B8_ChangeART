@@ -25,7 +25,7 @@
 링크 https://github.com/sdoram/B8_ChangeART_front
 
 
-## Screenshots
+## ERD
 
 ![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
 
