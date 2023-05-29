@@ -95,13 +95,14 @@ class MyPageView(APIView):
             return Response({"message": "권한이 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# 팔로우 기능
 class FollowView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, user_id):
-        following_user = get_object_or_404(User, id=user_id)  # 내가 팔로우 하려는 유저
-        user = request.user  # 나
+        following_user = get_object_or_404(User, id=user_id)
+        user = request.user
         if user in following_user.following.all():
             following_user.following.remove(user)
             return Response({"message": "팔로우를 취소했습니다"}, status=status.HTTP_200_OK)
