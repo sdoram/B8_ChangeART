@@ -12,13 +12,11 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .change import change
-from .models import Article, Comment, Images, Change
+from .models import Article, Comment, Images
 from .serializers import (
     HomeSerializer,
     ChangeSerializer,
     CommentSerializer,
-    ImageChangeSerializer,
     ArticleCreateSerializer,
     ArticleDetailSerializer,
 )
@@ -208,36 +206,3 @@ class CommentView(APIView):
             return Response(
                 {"message": "delete 요청 실패"}, status=status.HTTP_403_FORBIDDEN
             )
-
-
-class ChangePostView(APIView):
-    """이미지 변환"""
-
-    """
-    이미지 변환 코드를 불러오고 이미지의 이름을 바꿔줍니다.
-
-        Args:
-            request.data : 변환 전 이미지
-
-        Returns:
-            HTTP_201_CREATED : 이미지 변환 성공
-
-            HTTP_400_BAD_REQUEST : validation 실패
-    """
-
-    def get(self, request, change_id):
-        image = get_object_or_404(Change, pk=change_id)
-        serializer = ImageChangeSerializer(image)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = ChangeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            image = serializer.validated_data["before_image"]
-            change(image, serializer)
-            # return에서 instance.id로 js에서 변환된 이미지를 찾을 수 있도록 데이터 보내기
-            return Response(serializer.instance.id, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
